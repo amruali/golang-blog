@@ -9,7 +9,7 @@ import (
 
 	"github.com/amrali/golang-blog/pkg/db"
 	"github.com/amrali/golang-blog/pkg/models"
-	jwt "github.com/amrali/golang-blog/pkg/token"
+	auth "github.com/amrali/golang-blog/pkg/token"
 	"github.com/amrali/golang-blog/pkg/utils"
 )
 
@@ -127,7 +127,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Create JWT
-		token, err := jwt.CreateToken(strconv.Itoa(int(user.ID)))
+		token, err := auth.CreateToken(strconv.Itoa(int(user.ID)))
 		if err != nil {
 			utils.RespondWithError(w, http.StatusInternalServerError, "Couldn't login")
 			return
@@ -183,8 +183,23 @@ func alreayLoggedIn(r *http.Request)(bool){
 	if err != nil {
 		return false
 	}
-	Ok := jwt.VerifyToken(cookie.Value)
+	Ok, _ := auth.VerifyToken(cookie.Value)
 	return Ok
 }
+
+
+func getUser(r *http.Request)(string, bool){
+	cookie, err := r.Cookie("jwt")
+	if err != nil {
+		return "", false
+	}
+	Ok, userID := auth.VerifyToken(cookie.Value)
+	return  userID, Ok
+}
+
+
+
+
+
 
 
