@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,4 +31,9 @@ func EncryptPassword(password string) (HashedPassword []byte, err error) {
 func ComparePasswords(hashedPassword, password []byte)(err error){
 	err = bcrypt.CompareHashAndPassword(hashedPassword, password)
 	return
+}
+
+func ParseStringToUint(s string) (uint){
+	u64, _ := strconv.ParseUint(s, 10, 32)
+	return uint(u64)
 }
