@@ -4,7 +4,7 @@ import "time"
 
 type Post struct {
 	ID       uint           	`gorm:"AUTO_INCREMENT"`
-	Description  string         `gorm:"type:VARCHAR(400);NOT NULL"`
+	Description  string         `gorm:"type:VARCHAR(400);not null"`
 	UserID       uint           
 	PostComment  []PostComment 
 	CreatedAt    time.Time      
