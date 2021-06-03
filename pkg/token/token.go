@@ -2,9 +2,9 @@ package token
 
 import (
 	"time"
+
 	jwt "github.com/dgrijalva/jwt-go"
 )
-
 
 const (
 	SecretKey = "secret"
@@ -19,10 +19,11 @@ func CreateToken(Issuer string) (token string, err error) {
 	return
 }
 
-
-func VerifyToken(token string)(bool){
-	_, err := jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(tokenString string) (bool, string) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(SecretKey), nil
 	})
-	return err == nil
+	claims := token.Claims.(*jwt.StandardClaims)
+	return err == nil, claims.Issuer
 }
+
