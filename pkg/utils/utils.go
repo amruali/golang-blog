@@ -2,12 +2,17 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
+	"net/mail"
+	"regexp"
 	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+//var usernameRegex = regexp.MustCompile("^[a-zA-Z0-9]+([_ - .]?[a-zA-Z0-9])*$")
+var usernameRegex = regexp.MustCompile(`^[a-zA-Z]+([a-zA-Z0-9](_|-|.)[a-zA-Z0-9])*[a-zA-Z0-9]+$`)
 
 func RespondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
@@ -20,20 +25,32 @@ func RespondWithError(w http.ResponseWriter, code int, msg string) {
 	RespondWithJson(w, code, map[string]string{"error": msg})
 }
 
-func EncryptPassword(password string) (HashedPassword []byte, err error) {
-	HashedPassword, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		fmt.Println(err)
+func EncryptPassword(plain string) (HashedPassword []byte, err error) {
+	if len(plain) <= 7 {
+		return HashedPassword, errors.New("password length should be greater than seven")
 	}
+	HashedPassword, err = bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
 	return
 }
 
-func ComparePasswords(hashedPassword, password []byte)(err error){
+func ComparePasswords(hashedPassword, password []byte) (err error) {
 	err = bcrypt.CompareHashAndPassword(hashedPassword, password)
 	return
 }
 
-func ParseStringToUint(s string) (uint){
+func ParseStringToUint(s string) uint {
 	u64, _ := strconv.ParseUint(s, 10, 32)
 	return uint(u64)
+}
+
+func IsEmailValid(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+
+func IsUserNameValid(username string) bool {
+	if len(username) < 4 || len(username) > 20 {
+		return false
+	}
+	return usernameRegex.MatchString(username)
 }
