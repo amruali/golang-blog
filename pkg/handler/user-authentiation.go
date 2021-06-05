@@ -39,17 +39,29 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		// Create User-Object
 		var user = models.User{}
 
+		// username is valid
+		if !utils.IsUserNameValid(data["username"]){
+			utils.RespondWithError(w, http.StatusBadRequest, "username is not valid")
+			return
+		}
+
 		// Check that UserName is not Taken
 		res := db.Where("user_name = ?", data["username"]).Find(&user)
 		if res.RowsAffected == 1 && data["username"] == user.UserName {
-			utils.RespondWithError(w, http.StatusInternalServerError, "User Name is already taken")
+			utils.RespondWithError(w, http.StatusBadRequest, "username is already taken")
+			return
+		}
+
+		// Check that Email is valid
+		if !utils.IsEmailValid(data["email"]){
+			utils.RespondWithError(w, http.StatusBadRequest, "email is not valid")
 			return
 		}
 
 		// Check that Email is not taken
 		res = db.Where("email = ?", data["email"]).Find(&user)
 		if res.RowsAffected == 1 && data["email"] == user.Email {
-			utils.RespondWithError(w, http.StatusInternalServerError, "Email is already taken")
+			utils.RespondWithError(w, http.StatusBadRequest, "Email is already taken")
 			return
 		}
 
@@ -60,7 +72,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		// SetUp Password
 		user.Password, err = utils.EncryptPassword(data["password"])
 		if err != nil {
-			utils.RespondWithError(w, http.StatusInternalServerError, "Incorrect Password")
+			utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		// Insert Record to DB
