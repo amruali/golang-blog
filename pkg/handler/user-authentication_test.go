@@ -22,7 +22,7 @@ func TestRegister(t *testing.T) {
 
 	tests := getTestCases()
 
-	// Loop Over parameters
+	// Loop Over tests
 	for _, tc := range tests {
 		jsonVal, _ := json.Marshal(tc)
 		req, err := http.NewRequest("POST", "/register", strings.NewReader(string(jsonVal)))
